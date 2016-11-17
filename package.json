@@ -1,7 +1,7 @@
 {
   "name": "on-blow",
   "main": "index.js",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "EventEmitter triggered by the user blowing into their mic",
   "license": "MIT",
   "repository": "bendrucker/on-blow",
