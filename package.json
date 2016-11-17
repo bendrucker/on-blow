@@ -1,0 +1,29 @@
+{
+  "name": "on-blow",
+  "main": "index.js",
+  "version": "0.0.0",
+  "description": "EventEmitter triggered by the user blowing into their mic",
+  "license": "MIT",
+  "repository": "bendrucker/on-blow",
+  "author": {
+    "name": "Ben Drucker",
+    "email": "bvdrucker@gmail.com",
+    "url": "bendrucker.me"
+  },
+  "scripts": {
+    "test": "standard"
+  },
+  "keywords": [
+    "blow",
+    "microphone",
+    "mic",
+    "browser",
+    "audio"
+  ],
+  "devDependencies": {
+    "standard": "^8.0.0"
+  },
+  "files": [
+    "*.js"
+  ]
+}
