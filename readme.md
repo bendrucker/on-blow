@@ -15,6 +15,7 @@ $ npm install --save on-blow
 ```js
 var blow = require('on-blow')
 
+blow.run()
 blow.events
   .on('start', () => console.log('user blew'))
 ```
