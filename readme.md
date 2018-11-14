@@ -1,4 +1,4 @@
-# on-blow [![Build Status](https://travis-ci.org/bendrucker/on-blow.svg?branch=master)](https://travis-ci.org/bendrucker/on-blow)
+# on-blow [![Build Status](https://travis-ci.org/bendrucker/on-blow.svg?branch=master)](https://travis-ci.org/bendrucker/on-blow) [![Greenkeeper badge](https://badges.greenkeeper.io/bendrucker/on-blow.svg)](https://greenkeeper.io/)
 
 > EventEmitter triggered by the user blowing into their mic
 
