@@ -3,39 +3,39 @@
 var Events = require('events')
 var emitter = new Events()
 
- // https://github.com/Breathinglabs/JS-Breathing-Detection/blob/master/js/algorithm.js
+// https://github.com/Breathinglabs/JS-Breathing-Detection/blob/master/js/algorithm.js
 
 var breathingAlgorithm = module.exports = {
-  noiseLevelConst: 5000,   // Constant we add to noise level for fast on event TOF
-  noiseOffConst: 2000,     // Constant we add to noise level for fast off event
-  noiseOffSlowConst: 2000,     // Constant we add to noise level for fast off event
-  onFastConstant: -0.4,    // Constant we multiply max variance to get minimum
-  onFastNumOfVar: 4,     // Minimum variable to check if they pass windowCondition_2
-  offSlowNumOfPow: 10,     // Minimum variable to check if they pass windowCondition_2
-  offFastConst: 0.5,     // Off fast event constant to multiply with onFastConstant
-  functionRunning: false,  // Tells if blow detection is on, if true we are exhaling
-  ThrOnFast: 1,        // Threshold for our fast on event
-  ThrOffFast: 1,       // Threshold for our fast off event
-  ThrOffSlow: 1,         // Threshold for our slow off event
+  noiseLevelConst: 5000, // Constant we add to noise level for fast on event TOF
+  noiseOffConst: 2000, // Constant we add to noise level for fast off event
+  noiseOffSlowConst: 2000, // Constant we add to noise level for fast off event
+  onFastConstant: -0.4, // Constant we multiply max variance to get minimum
+  onFastNumOfVar: 4, // Minimum variable to check if they pass windowCondition_2
+  offSlowNumOfPow: 10, // Minimum variable to check if they pass windowCondition_2
+  offFastConst: 0.5, // Off fast event constant to multiply with onFastConstant
+  functionRunning: false, // Tells if blow detection is on, if true we are exhaling
+  ThrOnFast: 1, // Threshold for our fast on event
+  ThrOffFast: 1, // Threshold for our fast off event
+  ThrOffSlow: 1, // Threshold for our slow off event
   maxVariance: 0,
   minVariance: 0,
-  pow: 0,            // Sum of all frequency element data(b.frequencyBin) - power
-  noiseLevel: -1,      // Noise level (room)
-  pwVariance: 0,       // Our current variance
+  pow: 0, // Sum of all frequency element data(b.frequencyBin) - power
+  noiseLevel: -1, // Noise level (room)
+  pwVariance: 0, // Our current variance
   varOffVar: 0,
   sampleSize: 1024, // number of samples to collect before analyzing data
   fftSize: 1024, // must be power of two // **
-  frequencyBin: [],  // Put all frequency element data in array
-  countBlow: 0,      // Detected blow count for determining noise level calculation time
-  windowArray: [],  // For variance storage FIFO for determining slow or fast event
-  vcd: 0,          // For b.b.windowArray array size
-  windowArray_2: [],  // For variance storage when b.pow > b.ThrOnFast
-  vcd_2: 0,          // For b.b.windowArray_2 array size
-  mainCondition: false,    // If b.pow > b.ThrOnFast - if true it is
+  frequencyBin: [], // Put all frequency element data in array
+  countBlow: 0, // Detected blow count for determining noise level calculation time
+  windowArray: [], // For variance storage FIFO for determining slow or fast event
+  vcd: 0, // For b.b.windowArray array size
+  windowArray_2: [], // For variance storage when b.pow > b.ThrOnFast
+  vcd_2: 0, // For b.b.windowArray_2 array size
+  mainCondition: false, // If b.pow > b.ThrOnFast - if true it is
   offFastVar: 0,
   offFastVarCount: 0,
-  pcd: 0,          // Number of elements in arrays for slow events
-  PowerWindow: [],  // Array for b.pow to help us calculate variance b.pwVariance
+  pcd: 0, // Number of elements in arrays for slow events
+  PowerWindow: [], // Array for b.pow to help us calculate variance b.pwVariance
   pw: 0,
 
   run: function (pfu) {
@@ -57,15 +57,14 @@ var breathingAlgorithm = module.exports = {
     }
 
     /* Notification microphone acces window, if allowed go to goStream function */
-    getUserMedia({audio: true}, goStream)
-    return
+    getUserMedia({ audio: true }, goStream)
   },
   events: emitter
 }
 var b = breathingAlgorithm
 var sourceNode, analyserNode, javascriptNode
 
-    // Create audioContext
+// Create audioContext
 window.AudioContext = window.AudioContext ||
               window.webkitAudioContext ||
               window.mozAudioContext ||
@@ -74,7 +73,7 @@ window.AudioContext = window.AudioContext ||
 
 var audioContext = new global.AudioContext()
 
-    /* getUserMedia function def and prefix */
+/* getUserMedia function def and prefix */
 function getUserMedia (dictionary, callback) {
   navigator.getUserMedia = navigator.getUserMedia ||
                   navigator.webkitGetUserMedia ||
@@ -83,11 +82,11 @@ function getUserMedia (dictionary, callback) {
   navigator.getUserMedia(dictionary, callback, error)
 }
 
-    /* Main function goStream for signal processing and exhalation algorithm process */
+/* Main function goStream for signal processing and exhalation algorithm process */
 function goStream (stream) {
   var frequencyArray // array to hold frequency data
 
-      // create the media stream from the audio input source (microphone)
+  // create the media stream from the audio input source (microphone)
   sourceNode = audioContext.createMediaStreamSource(stream)
 
   analyserNode = audioContext.createAnalyser()
@@ -97,44 +96,44 @@ function goStream (stream) {
 
   javascriptNode = audioContext.createScriptProcessor(b.sampleSize, 1, 1)
 
-      // setup the event handler that is triggered every time enough samples have been collected
+  // setup the event handler that is triggered every time enough samples have been collected
   javascriptNode.onaudioprocess = function () {
     b.pow = 0
 
     frequencyArray = new Uint8Array(analyserNode.frequencyBinCount)
     analyserNode.getByteFrequencyData(frequencyArray)
 
-        // put in all frequencyArray data
+    // put in all frequencyArray data
     for (var i = 0; i < frequencyArray.length; i++) {
       b.frequencyBin[i] = frequencyArray[i]
     }
 
-        // sum all data in array
+    // sum all data in array
     b.frequencyBin.forEach(function (value) {
       b.pow += value
     })
 
-        // set noise level increase noise level and if current is > than saved then current is our new noise level(room)
-    if (b.noiseLevel === -1) {   // For very first input signal, just to set it on
+    // set noise level increase noise level and if current is > than saved then current is our new noise level(room)
+    if (b.noiseLevel === -1) { // For very first input signal, just to set it on
       b.noiseLevel = b.pow
-    } else {        // Setting noise level on off event and first 30 on event signals
+    } else { // Setting noise level on off event and first 30 on event signals
       if (b.pow < b.noiseLevel) {
         b.noiseLevel = b.pow
       } else if (b.pow > b.noiseLevel) {
         if (b.countBlow < 30) {
-          b.noiseLevel = b.noiseLevel + 10     // noise level
+          b.noiseLevel = b.noiseLevel + 10 // noise level
         } else if (b.countBlow > 30) {
-          b.noiseLevel = b.noiseLevel + 0      // noise level
+          b.noiseLevel = b.noiseLevel + 0 // noise level
         }
       }
     }
 
-        // Setting all thresholds for our on events
+    // Setting all thresholds for our on events
     b.ThrOnFast = Math.round(b.noiseLevel + b.noiseLevelConst)
     b.ThrOffFast = Math.round(b.noiseLevel + b.noiseOffConst)
     b.ThrOffSlow = Math.round(b.noiseLevel + b.noiseOffSlowConst)
 
-        // Calculating variances - putting each b.pow in array and the sub current and one past
+    // Calculating variances - putting each b.pow in array and the sub current and one past
     b.PowerWindow[b.pw] = b.pow
     if (b.pw > 0 && b.pw < 500) {
       b.pwVariance = Math.round(b.PowerWindow[b.pw] - b.PowerWindow[b.pw - 1])
@@ -145,7 +144,7 @@ function goStream (stream) {
 
     b.pw++
 
-        // Check if function for when exhalation is detected (on event) is running
+    // Check if function for when exhalation is detected (on event) is running
     if (b.functionRunning === false) {
       b.countBlow = 0
       onEvent(b.pow, b.pwVariance)
@@ -155,19 +154,19 @@ function goStream (stream) {
     }
   }
 
-      // Now connect the nodes together
-      // Do not connect source node to destination - to avoid feedback
+  // Now connect the nodes together
+  // Do not connect source node to destination - to avoid feedback
   sourceNode.connect(analyserNode)
   analyserNode.connect(javascriptNode)
   javascriptNode.connect(audioContext.destination)
 }
 
-    // Error function
+// Error function
 function error () {
   global.alert('Stream generation failed')
 }
 
-    // Events that are triggered on on and off event
+// Events that are triggered on on and off event
 var doEvent = (function () {
   return {
     stop: function () {
@@ -181,22 +180,22 @@ var doEvent = (function () {
   }
 }())
 
-    // Function for checking if variances are in certen interval
+// Function for checking if variances are in certen interval
 function CheckOn (value, index, ar) {
   return (value > b.minVariance && value < -1 * b.minVariance)
 }
 
-    /* ALGORITHM FOR DETECTING ON EVENTS */
+/* ALGORITHM FOR DETECTING ON EVENTS */
 function onEvent (getTotal, getVariance) {
-    // FAST
-      // calculate max and min variance and set b.mainCondition on true when done
+  // FAST
+  // calculate max and min variance and set b.mainCondition on true when done
   if (getTotal > b.ThrOnFast && b.mainCondition === false) {
-          // when variance > 0 count max and set min variance
+    // when variance > 0 count max and set min variance
     if (getVariance > 0 && getVariance > b.maxVariance) {
       b.maxVariance = getVariance
       b.minVariance = Math.round(b.onFastConstant * b.maxVariance)
       b.varOffVar = b.minVariance * b.offFastConst
-          // when variance < 0 get first neg variance and set b.mainCondition
+      // when variance < 0 get first neg variance and set b.mainCondition
     } else if (getVariance < 0 && getVariance < b.maxVariance) {
       b.mainCondition = true
     }
@@ -218,11 +217,11 @@ function onEvent (getTotal, getVariance) {
       b.vcd++
     }
   }
-    // SLOW
+  // SLOW
 
   if (b.pcd < 35) {
     if (getTotal > b.ThrOnFast && getVariance > -3000) {
-      b.pcd ++
+      b.pcd++
     } else {
       b.pcd = 0
     }
@@ -238,9 +237,9 @@ function CheckOff (value, index, ar) {
   return value < b.ThrOffSlow
 }
 
-    /* ALGORITHM FOR DETECTING OFF EVENTS */
+/* ALGORITHM FOR DETECTING OFF EVENTS */
 function offEvent (getOffTotal, getOffVariance) {
-      // get min variable of the previous 20 variables
+  // get min variable of the previous 20 variables
   if (b.offFastVarCount < 15) {
     if (getOffVariance < b.offFastVar) {
       b.offFastVar = getOffVariance
@@ -249,7 +248,7 @@ function offEvent (getOffTotal, getOffVariance) {
     b.offFastVarCount = 0
   }
 
-    // FAST
+  // FAST
   if (getOffTotal < b.ThrOffFast && b.offFastVar < b.varOffVar) {
     executeOffEv()
   } else if (getOffTotal < b.ThrOffFast && b.offFastVar > b.varOffVar) {
@@ -265,7 +264,7 @@ function offEvent (getOffTotal, getOffVariance) {
   }
 }
 
-    // function to be called if off event is triggered
+// function to be called if off event is triggered
 function executeOffEv () {
   b.vcd = 0
   b.vcd_2 = 0
@@ -282,4 +281,3 @@ function executeOffEv () {
   b.functionRunning = false
   doEvent.stop()
 }
-
